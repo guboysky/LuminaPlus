@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!--
+      纯静态部署（GitHub Pages 等）时把后端地址填进来，多个用英文逗号分隔；
+      由 Worker 托管时留空即可，前端会用同源地址。
+      `npm run build:github-page` 会用 .env 里的 API_BASE 自动写入这里。
+    -->
+    <meta name="apiBase" content="" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- 站点标题、图标、背景图由 CF-Server-Monitor 后台外观设置注入，主题不写死。 -->
+    <title>Monitor · LuminaPlus</title>
+    <script>
+      (() => {
+        const appearances = new Set(["system", "light", "dark"]);
+        const readAppearance = (key) => {
+          const raw = localStorage.getItem(key);
+          if (raw == null) return null;
+          let value = raw;
+          try {
+            value = JSON.parse(raw);
+          } catch {}
+          if (!appearances.has(value)) return null;
+          const normalized = JSON.stringify(value);
+          if (raw !== normalized) localStorage.setItem(key, normalized);
+          return value;
+        };
+
+        let appearance = "system";
+        try {
+          appearance = readAppearance("appearance") ?? readAppearance("appearance_default") ?? "system";
+        } catch {
+          appearance = "system";
+        }
+        const resolved =
+          appearance === "system"
+            ? window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light"
+            : appearance;
+        document.documentElement.dataset.appearance = resolved;
+        document.documentElement.style.colorScheme = resolved;
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = resolved === "dark" ? "#000000" : "#F5F5F7";
+
+        try {
+          const rawDepth = localStorage.getItem("cfsm-luminaplus:dark-depth");
+          if (rawDepth != null) {
+            const parsedDepth = Number(rawDepth);
+            const darkDepth = Number.isFinite(parsedDepth)
+              ? Math.min(100, Math.max(0, Math.round(parsedDepth)))
+              : 0;
+            if (darkDepth > 0) {
+              document.documentElement.style.setProperty(
+                "--dark-depth",
+                String(darkDepth),
+              );
+            } else {
+              document.documentElement.style.removeProperty("--dark-depth");
+            }
+          }
+        } catch {}
+
+        // 卡片不透明度的首帧缓存；背景图本身由后台注入的 <style> 负责。
+        try {
+          const rawSurface = localStorage.getItem("cfsm-luminaplus:surface");
+          if (rawSurface) {
+            const surface = JSON.parse(rawSurface);
+            if (surface && surface.v === 2) {
+              const parsedAlpha = Number(surface.alpha);
+              const alpha = Number.isFinite(parsedAlpha)
+                ? Math.min(100, Math.max(0, Math.round(parsedAlpha)))
+                : 100;
+              const scrim = alpha >= 95 ? 0 : Math.round(((95 - alpha) / 95) * 16);
+              const style = document.documentElement.style;
+              style.setProperty("--surface-alpha", String(alpha));
+              if (scrim > 0) {
+                style.setProperty(
+                  "--bg-scrim",
+                  `color-mix(in srgb, var(--bg-0) ${scrim}%, transparent)`,
+                );
+              } else {
+                style.removeProperty("--bg-scrim");
+              }
+            }
+          }
+        } catch {}
+      })();
+    </script>
+    <script type="module" crossorigin src="./assets/index-B21hM2jl.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-B0Z9INg1.js">
+    <link rel="modulepreload" crossorigin href="./assets/charts-DVFhBsiJ.js">
+    <link rel="modulepreload" crossorigin href="./assets/react-D0BADVFH.js">
+    <link rel="modulepreload" crossorigin href="./assets/query-CkhtCRCi.js">
+    <link rel="modulepreload" crossorigin href="./assets/validation-7tIbKHny.js">
+    <link rel="modulepreload" crossorigin href="./assets/Spinner-b_CiRbgc.js">
+    <link rel="stylesheet" crossorigin href="./assets/charts-CnsZ1jie.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-Domqzvd2.css">
+    <meta name="theme-version" content="LuminaPlus v1.2.16" />
+  </head>
+  <body>
+    <div id="root" class="relative z-30"></div>
+  </body>
+</html>

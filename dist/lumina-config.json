@@ -1,0 +1,15 @@
+{
+  "title": "我的探针",
+  "probeIds": [],
+  "nodeGroups": {},
+  "nodeTags": {},
+  "themeOptions": {
+    "desktopNodeViewMode": "large",
+    "mobileNodeViewMode": "compact",
+    "enableHomepageMultiPing": true,
+    "homepageMultiPingTaskIds": [1, 2, 3],
+    "fakePingForUnbound": false,
+    "showCostSummary": true,
+    "showAssetRating": false
+  }
+}
